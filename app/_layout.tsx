@@ -1,5 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { QueryClientProvider } from '@tanstack/react-query';
+import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -11,9 +12,20 @@ import { DattaSplash } from '@/components/brand/datta-splash';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuthStore } from '@/lib/auth-store';
 import { queryClient } from '@/lib/query-client';
+import { registerPushTokenIfPermitted } from '@/lib/push-tokens';
 import { useDattaFonts } from '@/theme/use-fonts';
 
 SplashScreen.preventAutoHideAsync();
+
+// §7 anti-FOMO — foreground 알림은 시끄럽지 않게.
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 const JS_SPLASH_DURATION_MS = 1600;
 
@@ -26,10 +38,18 @@ export default function RootLayout() {
   const [fontsLoaded, fontError] = useDattaFonts();
   const [showJsSplash, setShowJsSplash] = useState(true);
   const initializeAuth = useAuthStore((s) => s.initialize);
+  const session = useAuthStore((s) => s.session);
 
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
+
+  useEffect(() => {
+    if (session) {
+      // 권한이 이미 있을 때만 silently 등록. 권한 요청은 [나 → 알림] 화면에서.
+      registerPushTokenIfPermitted();
+    }
+  }, [session]);
 
   useEffect(() => {
     if (!fontsLoaded && !fontError) return;
