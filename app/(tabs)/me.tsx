@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -13,6 +14,7 @@ type MenuItem = {
 };
 
 export default function MeScreen() {
+  const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const signOut = useAuthStore((s) => s.signOut);
 
@@ -27,7 +29,11 @@ export default function MeScreen() {
     {
       section: '신뢰',
       items: [
-        { label: '영구 백업 — PDF·ZIP 내보내기', hint: '언제든, 영원히 무료' },
+        {
+          label: '영구 백업 — PDF·ZIP 내보내기',
+          hint: '언제든, 영원히 무료',
+          onPress: () => router.push('/backup'),
+        },
         { label: '상속 관리자 지정', hint: '배우자 또는 지인 1명' },
         { label: '회사 신뢰 페이지', hint: '분기별 transparency report' },
       ],
