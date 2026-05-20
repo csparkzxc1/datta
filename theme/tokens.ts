@@ -28,11 +28,11 @@ export const radii = {
 } as const;
 
 export const fonts = {
-  serif: 'NotoSerifKR-Medium',
-  serifBold: 'NotoSerifKR-Bold',
-  body: 'GowunDodum-Regular',
-  hand: 'MaruBuri-Regular',
-  english: 'CormorantGaramond-Italic',
+  serif: 'NotoSerifKR_500Medium',
+  serifBold: 'NotoSerifKR_700Bold',
+  body: 'GowunDodum_400Regular',
+  hand: 'MaruBuri_400Regular',
+  english: 'CormorantGaramond_400Regular_Italic',
 } as const;
 
 export const sizes = {

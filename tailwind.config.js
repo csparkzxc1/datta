@@ -19,11 +19,11 @@ module.exports = {
         success: '#8FA68E',
       },
       fontFamily: {
-        serif: ['NotoSerifKR-Medium'],
-        'serif-bold': ['NotoSerifKR-Bold'],
-        body: ['GowunDodum-Regular'],
-        hand: ['MaruBuri-Regular'],
-        english: ['CormorantGaramond-Italic'],
+        serif: ['NotoSerifKR_500Medium'],
+        'serif-bold': ['NotoSerifKR_700Bold'],
+        body: ['GowunDodum_400Regular'],
+        hand: ['MaruBuri_400Regular'],
+        english: ['CormorantGaramond_400Regular_Italic'],
       },
       borderRadius: {
         sm: '4px',
