@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { Text, View } from 'react-native';
 
 import { Card } from '@/components/ui/card';
@@ -13,13 +14,14 @@ type Props = {
 const SEAL_SIZE = 24;
 
 export function CapsuleCard({ capsule, child }: Props) {
+  const router = useRouter();
   const unlockAt = new Date(capsule.unlock_at);
   const dDay = calculateDDay(unlockAt);
   const sealed = capsule.is_sealed;
   const delivered = capsule.is_delivered;
 
   return (
-    <Card>
+    <Card onPress={() => router.push(`/capsule/${capsule.id}`)}>
       <View style={{ gap: spacing.xs, flexDirection: 'row' }}>
         <View style={{ flex: 1, gap: spacing.xs }}>
           <Text

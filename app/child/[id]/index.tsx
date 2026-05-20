@@ -1,17 +1,24 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
-
-import { MilestoneCard } from '@/components/ui/milestone-card';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import {
-  formatAgeAtThen,
-  resolveMilestones,
-} from '@/lib/milestones';
-import { useChildren } from '@/lib/queries/children';
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native';
+
+import { Button } from '@/components/ui/button';
+import { MilestoneCard } from '@/components/ui/milestone-card';
+import { formatAgeAtThen, resolveMilestones } from '@/lib/milestones';
+import { useChildren, useDeleteChild } from '@/lib/queries/children';
 import { colors, fonts, sizes, spacing } from '@/theme/tokens';
 
 export default function ChildDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const { data: children, isLoading } = useChildren();
+  const deleteChild = useDeleteChild();
   const child = children?.find((c) => c.id === id);
 
   if (isLoading) {
@@ -39,9 +46,49 @@ export default function ChildDetailScreen() {
     now,
   });
 
+  const confirmDelete = () => {
+    Alert.alert(
+      `${child.name}을 지울까요?`,
+      '자녀를 지우면 이 자녀에게 보낼 모든 캡슐과 사진도 함께 사라집니다. 되돌릴 수 없어요.\n\n먼저 [나 → 영구 백업]에서 내보내기를 한 번 해두시는 걸 권해요.',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '지우기',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteChild.mutateAsync(child.id);
+              router.back();
+            } catch {
+              Alert.alert('잠시 멈췄어요', '다시 시도해보실까요.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <>
-      <Stack.Screen options={{ title: child.name }} />
+      <Stack.Screen
+        options={{
+          title: child.name,
+          headerRight: () => (
+            <Pressable
+              onPress={() => router.push(`/child/${child.id}/edit`)}
+              hitSlop={12}>
+              <Text
+                style={{
+                  fontFamily: fonts.body,
+                  fontSize: sizes.sm,
+                  color: colors.peach,
+                }}>
+                수정
+              </Text>
+            </Pressable>
+          ),
+        }}
+      />
       <ScrollView
         style={{ backgroundColor: colors.paper }}
         contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }}>
@@ -72,6 +119,8 @@ export default function ChildDetailScreen() {
             )}
           </View>
         </View>
+
+        <Button label={`${child.name} 지우기`} variant="tertiary" onPress={confirmDelete} />
       </ScrollView>
     </>
   );
