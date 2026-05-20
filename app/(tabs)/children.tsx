@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { colors, fonts, sizes, spacing } from '@/theme/tokens';
 
-export default function CapsulesScreen() {
+export default function ChildrenScreen() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.paper }}>
       <ScrollView
@@ -20,7 +20,7 @@ export default function CapsulesScreen() {
               fontSize: sizes['3xl'],
               color: colors.inkWarm,
             }}>
-            캡슐
+            자녀
           </Text>
           <Text
             style={{
@@ -28,7 +28,7 @@ export default function CapsulesScreen() {
               fontSize: sizes.sm,
               color: colors.inkSoft,
             }}>
-            오늘의 한 줄이, 그날의 평생이 됩니다.
+            닿게 할 마음의 받는 사람.
           </Text>
         </View>
 
@@ -40,7 +40,7 @@ export default function CapsulesScreen() {
                 fontSize: sizes.lg,
                 color: colors.inkWarm,
               }}>
-              아직 봉인된 캡슐이 없어요
+              자녀를 등록해보실까요
             </Text>
             <Text
               style={{
@@ -49,10 +49,10 @@ export default function CapsulesScreen() {
                 color: colors.inkSoft,
                 lineHeight: sizes.base * 1.7,
               }}>
-              지금 떠오르는 한 마디가 평생 닿는 한 줄이 됩니다. 첫 캡슐을
-              만들어보실까요?
+              자녀의 생일을 알려주시면, 백일·돌·입학·성년식 같은 한국의
+              마일스톤을 자동으로 안내해드립니다.
             </Text>
-            <Button label="첫 캡슐 만들기" />
+            <Button label="자녀 등록하기" />
           </View>
         </Card>
       </ScrollView>
