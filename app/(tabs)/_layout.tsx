@@ -1,10 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 
 import { HapticTab } from '@/components/haptic-tab';
+import { useAuthStore } from '@/lib/auth-store';
 import { colors, fonts, sizes } from '@/theme/tokens';
 
 export default function TabLayout() {
+  const session = useAuthStore((s) => s.session);
+  const initializing = useAuthStore((s) => s.initializing);
+
+  if (initializing) return null;
+  if (!session) return <Redirect href="/onboarding/welcome" />;
+
   return (
     <Tabs
       screenOptions={{
