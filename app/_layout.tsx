@@ -72,6 +72,9 @@ export default function RootLayout() {
           <Stack.Screen name="child" options={{ headerShown: false }} />
           <Stack.Screen name="capsule" options={{ headerShown: false }} />
           <Stack.Screen name="backup" />
+          <Stack.Screen name="inheritance" />
+          <Stack.Screen name="transparency" />
+          <Stack.Screen name="legal" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
         </Stack>
         <StatusBar style="auto" />

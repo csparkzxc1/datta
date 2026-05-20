@@ -34,8 +34,16 @@ export default function MeScreen() {
           hint: '언제든, 영원히 무료',
           onPress: () => router.push('/backup'),
         },
-        { label: '상속 관리자 지정', hint: '배우자 또는 지인 1명' },
-        { label: '회사 신뢰 페이지', hint: '분기별 transparency report' },
+        {
+          label: '상속 관리자 지정',
+          hint: '배우자 또는 지인 1명',
+          onPress: () => router.push('/inheritance'),
+        },
+        {
+          label: '회사 신뢰 페이지',
+          hint: '분기별 transparency report',
+          onPress: () => router.push('/transparency'),
+        },
       ],
     },
     {
@@ -47,7 +55,10 @@ export default function MeScreen() {
       items: [
         { label: '알림', hint: '모두 끄셔도 괜찮습니다' },
         { label: '도움말 / 문의' },
-        { label: '약관 / 개인정보처리방침' },
+        {
+          label: '약관 / 개인정보처리방침',
+          onPress: () => router.push('/legal'),
+        },
       ],
     },
     {
