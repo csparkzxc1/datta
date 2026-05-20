@@ -1,9 +1,12 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Haptics from 'expo-haptics';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -28,7 +31,10 @@ import {
   useUpdateCapsule,
 } from '@/lib/queries/capsules';
 import { useChildren, type Child } from '@/lib/queries/children';
-import { colors, fonts, sizes, spacing } from '@/theme/tokens';
+import { extractExt, uploadCapsuleMedia, type UploadAsset } from '@/lib/r2-upload';
+import { colors, fonts, radii, sizes, spacing } from '@/theme/tokens';
+
+const MAX_PHOTOS = 5;
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -51,6 +57,8 @@ export default function NewCapsuleScreen() {
   const [draftId, setDraftId] = useState<string | null>(null);
   const [showAndroidPicker, setShowAndroidPicker] = useState(false);
   const [showSealAnim, setShowSealAnim] = useState(false);
+  const [photos, setPhotos] = useState<UploadAsset[]>([]);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
 
   const selectedChild: Child | undefined = useMemo(
     () => children?.find((c) => c.id === childId),
@@ -71,7 +79,62 @@ export default function NewCapsuleScreen() {
       setStep(3);
     } else if (step === 3 && body.trim().length > 0) {
       await flushDraft();
+      await flushPhotos();
       setStep(4);
+    }
+  };
+
+  const addPhotos = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('사진 접근 권한이 필요해요', '설정에서 사진 권한을 허용해주세요.');
+      return;
+    }
+
+    const remaining = MAX_PHOTOS - photos.length;
+    if (remaining <= 0) return;
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      selectionLimit: remaining,
+      quality: 0.9,
+    });
+    if (result.canceled) return;
+
+    const newAssets: UploadAsset[] = result.assets.map((a) => ({
+      uri: a.uri,
+      mimeType: a.mimeType ?? 'image/jpeg',
+      ext: extractExt(a.uri),
+      width: a.width ?? 0,
+      height: a.height ?? 0,
+      sizeBytes: a.fileSize ?? 0,
+    }));
+    setPhotos((prev) => [...prev, ...newAssets].slice(0, MAX_PHOTOS));
+  };
+
+  const removePhoto = (uri: string) => {
+    setPhotos((prev) => prev.filter((p) => p.uri !== uri));
+  };
+
+  const flushPhotos = async () => {
+    if (!draftId || photos.length === 0) return;
+    setUploadingPhotos(true);
+    const failed: UploadAsset[] = [];
+    for (let i = 0; i < photos.length; i++) {
+      try {
+        await uploadCapsuleMedia(draftId, photos[i], i);
+      } catch {
+        failed.push(photos[i]);
+      }
+    }
+    setUploadingPhotos(false);
+    setPhotos(failed);
+    if (failed.length > 0) {
+      Alert.alert(
+        '일부 사진을 못 올렸어요',
+        '네트워크가 잠시 멈췄을 수 있어요. 다시 시도해보실까요?'
+      );
     }
   };
 
@@ -217,6 +280,10 @@ export default function NewCapsuleScreen() {
               onTitleChange={setTitle}
               onBodyChange={setBody}
               autoSaving={updateCapsule.isPending}
+              photos={photos}
+              onAddPhotos={addPhotos}
+              onRemovePhoto={removePhoto}
+              uploadingPhotos={uploadingPhotos}
             />
           )}
 
@@ -451,12 +518,20 @@ function Step3Body({
   onTitleChange,
   onBodyChange,
   autoSaving,
+  photos,
+  onAddPhotos,
+  onRemovePhoto,
+  uploadingPhotos,
 }: {
   title: string;
   body: string;
   onTitleChange: (v: string) => void;
   onBodyChange: (v: string) => void;
   autoSaving: boolean;
+  photos: UploadAsset[];
+  onAddPhotos: () => void;
+  onRemovePhoto: (uri: string) => void;
+  uploadingPhotos: boolean;
 }) {
   return (
     <View style={{ gap: spacing.md }}>
@@ -498,6 +573,62 @@ function Step3Body({
       <Text style={{ fontFamily: fonts.body, fontSize: sizes.xs, color: colors.inkSoft }}>
         {body.length.toLocaleString()} / 5,000자
       </Text>
+
+      <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
+        <Text
+          style={{
+            fontFamily: fonts.body,
+            fontSize: sizes.sm,
+            color: colors.inkSoft,
+          }}>
+          사진 (선택, 최대 {MAX_PHOTOS}장)
+        </Text>
+        <View style={{ flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' }}>
+          {photos.map((p) => (
+            <Pressable
+              key={p.uri}
+              onLongPress={() => onRemovePhoto(p.uri)}
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: radii.md,
+                overflow: 'hidden',
+                borderWidth: 0.5,
+                borderColor: colors.inkSoft,
+              }}>
+              <Image source={{ uri: p.uri }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+            </Pressable>
+          ))}
+          {photos.length < MAX_PHOTOS && (
+            <Pressable
+              onPress={onAddPhotos}
+              style={({ pressed }) => ({
+                width: 72,
+                height: 72,
+                borderRadius: radii.md,
+                borderWidth: 1,
+                borderColor: colors.inkSoft,
+                borderStyle: 'dashed',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: pressed ? colors.peachSoft : 'transparent',
+              })}>
+              <Text style={{ fontFamily: fonts.body, fontSize: sizes.xl, color: colors.inkSoft }}>
+                +
+              </Text>
+            </Pressable>
+          )}
+        </View>
+        {uploadingPhotos ? (
+          <Text style={{ fontFamily: fonts.body, fontSize: sizes.xs, color: colors.inkSoft }}>
+            사진을 올리고 있어요…
+          </Text>
+        ) : photos.length > 0 ? (
+          <Text style={{ fontFamily: fonts.body, fontSize: sizes.xs, color: colors.inkSoft }}>
+            길게 눌러 빼기. 다음 단계로 갈 때 함께 봉인됩니다.
+          </Text>
+        ) : null}
+      </View>
     </View>
   );
 }
