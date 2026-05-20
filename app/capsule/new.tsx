@@ -32,6 +32,7 @@ import {
 } from '@/lib/queries/capsules';
 import { useChildren, type Child } from '@/lib/queries/children';
 import { extractExt, uploadCapsuleMedia, type UploadAsset } from '@/lib/r2-upload';
+import { track } from '@/lib/analytics';
 import { colors, fonts, radii, sizes, spacing } from '@/theme/tokens';
 
 const MAX_PHOTOS = 5;
@@ -149,6 +150,10 @@ export default function NewCapsuleScreen() {
         title: null,
       });
       setDraftId(draft.id);
+      track({
+        name: 'capsule_started',
+        props: milestoneKey ? { milestone_key: milestoneKey } : undefined,
+      });
     } catch {
       // 네트워크 실패 — Step 3에서 자동저장 시 재시도
     }
@@ -185,6 +190,14 @@ export default function NewCapsuleScreen() {
       await flushDraft();
       await sealCapsule.mutateAsync(draftId);
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      track({
+        name: 'capsule_sealed',
+        props: {
+          has_photos: photos.length > 0,
+          photo_count: photos.length,
+          ...(milestoneKey ? { milestone_key: milestoneKey } : {}),
+        },
+      });
       setShowSealAnim(true);
     } catch {
       // 봉인 실패 — 화면에 유지, 사용자가 재시도

@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { track } from '@/lib/analytics';
 import { useAuthStore } from '@/lib/auth-store';
 import { colors, fonts, sizes, spacing } from '@/theme/tokens';
 
@@ -38,6 +39,7 @@ export default function LoginScreen() {
       return;
     }
 
+    track({ name: mode === 'signin' ? 'login_success' : 'signup_success' });
     router.replace('/(tabs)');
   };
 

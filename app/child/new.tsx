@@ -6,6 +6,7 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } fro
 import { Button } from '@/components/ui/button';
 import { Choice } from '@/components/ui/choice';
 import { Input } from '@/components/ui/input';
+import { track } from '@/lib/analytics';
 import { useAddChild, type Gender, type Relationship } from '@/lib/queries/children';
 import { colors, fonts, sizes, spacing } from '@/theme/tokens';
 
@@ -43,6 +44,7 @@ export default function NewChildScreen() {
         gender,
         relationship,
       });
+      track({ name: 'child_added' });
       router.back();
     } catch (e) {
       setSubmitError(

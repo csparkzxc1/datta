@@ -53,7 +53,11 @@ export default function MeScreen() {
     {
       section: '설정',
       items: [
-        { label: '알림', hint: '모두 끄셔도 괜찮습니다' },
+        {
+          label: '알림',
+          hint: '모두 끄셔도 괜찮습니다',
+          onPress: () => router.push('/notifications'),
+        },
         { label: '도움말 / 문의' },
         {
           label: '약관 / 개인정보처리방침',

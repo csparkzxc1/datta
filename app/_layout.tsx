@@ -10,7 +10,9 @@ import '../global.css';
 
 import { DattaSplash } from '@/components/brand/datta-splash';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { identifyUser, initAnalytics, resetAnalytics, track } from '@/lib/analytics';
 import { useAuthStore } from '@/lib/auth-store';
+import { initErrorTracking } from '@/lib/error-tracking';
 import { queryClient } from '@/lib/query-client';
 import { registerPushTokenIfPermitted } from '@/lib/push-tokens';
 import { useDattaFonts } from '@/theme/use-fonts';
@@ -42,12 +44,17 @@ export default function RootLayout() {
 
   useEffect(() => {
     initializeAuth();
+    initAnalytics().then(() => track({ name: 'app_open' }));
+    initErrorTracking();
   }, [initializeAuth]);
 
   useEffect(() => {
     if (session) {
+      identifyUser(session.user.id);
       // 권한이 이미 있을 때만 silently 등록. 권한 요청은 [나 → 알림] 화면에서.
       registerPushTokenIfPermitted();
+    } else {
+      resetAnalytics();
     }
   }, [session]);
 
@@ -75,6 +82,7 @@ export default function RootLayout() {
           <Stack.Screen name="inheritance" />
           <Stack.Screen name="transparency" />
           <Stack.Screen name="legal" options={{ headerShown: false }} />
+          <Stack.Screen name="notifications" />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
         </Stack>
         <StatusBar style="auto" />
