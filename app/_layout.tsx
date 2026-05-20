@@ -1,4 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -8,6 +9,8 @@ import '../global.css';
 
 import { DattaSplash } from '@/components/brand/datta-splash';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useAuthStore } from '@/lib/auth-store';
+import { queryClient } from '@/lib/query-client';
 import { useDattaFonts } from '@/theme/use-fonts';
 
 SplashScreen.preventAutoHideAsync();
@@ -22,6 +25,11 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [fontsLoaded, fontError] = useDattaFonts();
   const [showJsSplash, setShowJsSplash] = useState(true);
+  const initializeAuth = useAuthStore((s) => s.initialize);
+
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
 
   useEffect(() => {
     if (!fontsLoaded && !fontError) return;
@@ -36,13 +44,15 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-      {showJsSplash && <DattaSplash />}
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        </Stack>
+        <StatusBar style="auto" />
+        {showJsSplash && <DattaSplash />}
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
