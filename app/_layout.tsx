@@ -2,14 +2,17 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import '../global.css';
 
+import { DattaSplash } from '@/components/brand/datta-splash';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useDattaFonts } from '@/theme/use-fonts';
 
 SplashScreen.preventAutoHideAsync();
+
+const JS_SPLASH_DURATION_MS = 1600;
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -18,11 +21,14 @@ export const unstable_settings = {
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [fontsLoaded, fontError] = useDattaFonts();
+  const [showJsSplash, setShowJsSplash] = useState(true);
 
   useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
-    }
+    if (!fontsLoaded && !fontError) return;
+
+    SplashScreen.hideAsync();
+    const timer = setTimeout(() => setShowJsSplash(false), JS_SPLASH_DURATION_MS);
+    return () => clearTimeout(timer);
   }, [fontsLoaded, fontError]);
 
   if (!fontsLoaded && !fontError) {
@@ -36,6 +42,7 @@ export default function RootLayout() {
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
       <StatusBar style="auto" />
+      {showJsSplash && <DattaSplash />}
     </ThemeProvider>
   );
 }
