@@ -1,0 +1,93 @@
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { QueryClientProvider } from '@tanstack/react-query';
+import * as Notifications from 'expo-notifications';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
+import 'react-native-reanimated';
+import '../global.css';
+
+import { DattaSplash } from '@/components/brand/datta-splash';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { identifyUser, initAnalytics, resetAnalytics, track } from '@/lib/analytics';
+import { useAuthStore } from '@/lib/auth-store';
+import { initErrorTracking } from '@/lib/error-tracking';
+import { queryClient } from '@/lib/query-client';
+import { registerPushTokenIfPermitted } from '@/lib/push-tokens';
+import { useDattaFonts } from '@/theme/use-fonts';
+
+SplashScreen.preventAutoHideAsync();
+
+// §7 anti-FOMO — foreground 알림은 시끄럽지 않게.
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
+
+const JS_SPLASH_DURATION_MS = 1600;
+
+export const unstable_settings = {
+  anchor: '(tabs)',
+};
+
+export default function RootLayout() {
+  const colorScheme = useColorScheme();
+  const [fontsLoaded, fontError] = useDattaFonts();
+  const [showJsSplash, setShowJsSplash] = useState(true);
+  const initializeAuth = useAuthStore((s) => s.initialize);
+  const session = useAuthStore((s) => s.session);
+
+  useEffect(() => {
+    initializeAuth();
+    initAnalytics().then(() => track({ name: 'app_open' }));
+    initErrorTracking();
+  }, [initializeAuth]);
+
+  useEffect(() => {
+    if (session) {
+      identifyUser(session.user.id);
+      // 권한이 이미 있을 때만 silently 등록. 권한 요청은 [나 → 알림] 화면에서.
+      registerPushTokenIfPermitted();
+    } else {
+      resetAnalytics();
+    }
+  }, [session]);
+
+  useEffect(() => {
+    if (!fontsLoaded && !fontError) return;
+
+    SplashScreen.hideAsync();
+    const timer = setTimeout(() => setShowJsSplash(false), JS_SPLASH_DURATION_MS);
+    return () => clearTimeout(timer);
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+          <Stack.Screen name="child" options={{ headerShown: false }} />
+          <Stack.Screen name="capsule" options={{ headerShown: false }} />
+          <Stack.Screen name="backup" />
+          <Stack.Screen name="inheritance" />
+          <Stack.Screen name="transparency" />
+          <Stack.Screen name="legal" options={{ headerShown: false }} />
+          <Stack.Screen name="notifications" />
+          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        </Stack>
+        <StatusBar style="auto" />
+        {showJsSplash && <DattaSplash />}
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}

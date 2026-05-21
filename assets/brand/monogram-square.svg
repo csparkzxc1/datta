@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="닿다 모노그램 (정사각형 / 앱 아이콘)">
+  <title>닿다 모노그램 — 둥근 모서리 사각형, paper 배경, ink-warm "닿", peach 도트 우상단</title>
+  <rect width="1024" height="1024" rx="225" ry="225" fill="#FAF6EE"/>
+  <text x="512" y="730" font-family="Noto Serif KR, Noto Serif CJK KR, serif" font-weight="500" font-size="660" fill="#2B1F19" text-anchor="middle">닿</text>
+  <circle cx="850" cy="174" r="62" fill="#E8927C"/>
+</svg>

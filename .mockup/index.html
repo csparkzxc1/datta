@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>닿다 — 화면 목업</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,500&family=Gowun+Dodum&family=Noto+Serif+KR:wght@500;700&display=swap">
+<style>
+  :root {
+    --paper: #FAF6EE;
+    --ink-warm: #2B1F19;
+    --ink-soft: #5C4F45;
+    --peach: #E8927C;
+    --peach-soft: #F4D5C9;
+    --sage: #8FA68E;
+    --gold-warm: #C9A876;
+    --error: #A65A4F;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #E7E2D9; }
+  body {
+    font-family: 'Gowun Dodum', system-ui, sans-serif;
+    color: var(--ink-warm);
+    padding: 48px 24px 96px;
+  }
+  h1.page {
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 500;
+    font-size: 32px;
+    text-align: center;
+    margin: 0 0 8px;
+  }
+  .page-sub {
+    text-align: center;
+    color: #6b6258;
+    font-size: 14px;
+    margin: 0 0 48px;
+    letter-spacing: 0.2px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 390px);
+    gap: 72px 32px;
+    justify-content: center;
+  }
+
+  /* —— iPhone frame —— */
+  .screen {
+    width: 390px;
+    height: 844px;
+    background: var(--paper);
+    border-radius: 44px;
+    position: relative;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.18);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .screen::before {
+    content: '';
+    position: absolute;
+    top: 12px; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 32px;
+    background: #111;
+    border-radius: 20px;
+    z-index: 50;
+  }
+  .label {
+    position: absolute;
+    top: -36px; left: 0;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: #5C4F45;
+  }
+  .label .num {
+    color: var(--peach);
+    font-weight: 500;
+    margin-right: 6px;
+  }
+
+  /* —— Status bar —— */
+  .statusbar {
+    height: 56px;
+    padding: 18px 36px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: 14px;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--ink-warm);
+  }
+
+  /* —— Common —— */
+  .pad { padding: 24px; flex: 1; display: flex; flex-direction: column; }
+  .pad-x { padding: 0 24px; }
+  .gap-xs > * + * { margin-top: 4px; }
+  .gap-sm > * + * { margin-top: 8px; }
+  .gap-md > * + * { margin-top: 16px; }
+  .gap-lg > * + * { margin-top: 24px; }
+  .gap-xl > * + * { margin-top: 32px; }
+
+  /* —— Typography —— */
+  .serif { font-family: 'Noto Serif KR', serif; font-weight: 500; color: var(--ink-warm); }
+  .serif-b { font-family: 'Noto Serif KR', serif; font-weight: 700; }
+  .body { font-family: 'Gowun Dodum', sans-serif; }
+  .english { font-family: 'Cormorant Garamond', serif; font-style: italic; }
+  .hand {
+    /* MaruBuri 대체 — 시스템 손글씨 톤 한글 fallback */
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+  }
+  .h1 { font-size: 32px; line-height: 1.4; }
+  .h2 { font-size: 24px; line-height: 1.4; }
+  .h3 { font-size: 20px; line-height: 1.4; }
+  .h4 { font-size: 17px; line-height: 1.5; }
+  .t { font-size: 15px; line-height: 1.7; }
+  .s { font-size: 13px; line-height: 1.6; }
+  .xs { font-size: 11px; line-height: 1.5; }
+  .ink-soft { color: var(--ink-soft); }
+  .peach { color: var(--peach); }
+  .gold { color: var(--gold-warm); }
+  .sage { color: var(--sage); }
+  .center { text-align: center; }
+  .upper { text-transform: uppercase; letter-spacing: 1.2px; }
+
+  /* —— Card —— */
+  .card {
+    background: var(--paper);
+    border: 0.5px solid var(--ink-soft);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .card.tight { padding: 0; }
+  .card.peach-soft {
+    background: var(--peach-soft);
+    border-color: var(--peach);
+  }
+  .card-row {
+    padding: 16px;
+    border-bottom: 0.5px solid rgba(92,79,69,0.2);
+  }
+  .card-row:last-child { border-bottom: 0; }
+
+  /* —— Button —— */
+  .btn {
+    border-radius: 4px;
+    padding: 14px 32px;
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 15px;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+  }
+  .btn.primary { background: var(--peach); color: var(--paper); }
+  .btn.secondary {
+    background: transparent;
+    color: var(--ink-warm);
+    border: 1px solid var(--ink-warm);
+  }
+  .btn.tertiary { background: transparent; color: var(--peach); }
+  .btn.full { display: block; width: 100%; }
+
+  /* —— Input —— */
+  .input {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--ink-soft);
+    color: var(--ink-warm);
+    font-size: 15px;
+    font-family: 'Gowun Dodum';
+  }
+  .input.focus { border-bottom: 1.5px solid var(--peach); }
+  .input.placeholder { color: rgba(92,79,69,0.3); }
+  .input-label { font-size: 13px; color: var(--ink-soft); margin-bottom: 4px; }
+
+  /* —— Choice (pill) —— */
+  .choice {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--ink-soft);
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-right: 8px;
+  }
+  .choice.on {
+    border-color: var(--peach);
+    background: var(--peach-soft);
+    color: var(--ink-warm);
+  }
+
+  /* —— Wordmark —— */
+  .wordmark {
+    font-family: 'Noto Serif KR';
+    font-weight: 500;
+    color: var(--ink-warm);
+    display: inline-flex;
+    align-items: flex-start;
+  }
+  .wordmark .dot {
+    width: 0.12em;
+    height: 0.12em;
+    background: var(--peach);
+    border-radius: 50%;
+    margin-left: 0.06em;
+    margin-top: 0.1em;
+  }
+
+  /* —— Tabbar —— */
+  .tabbar {
+    height: 88px;
+    background: var(--paper);
+    border-top: 0.5px solid rgba(92,79,69,0.2);
+    display: flex;
+    align-items: flex-start;
+    padding: 8px 0 32px;
+  }
+  .tabbar .tab {
+    flex: 1;
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 11px;
+    font-family: 'Gowun Dodum';
+  }
+  .tabbar .tab.active { color: var(--peach); }
+  .tabbar .tab .icon {
+    display: block; height: 28px; line-height: 28px;
+    font-size: 20px; margin-bottom: 4px;
+  }
+
+  /* —— Header —— */
+  .header {
+    padding: 8px 24px 16px;
+    border-bottom: 0.5px solid transparent;
+    font-family: 'Noto Serif KR';
+    font-weight: 500;
+    font-size: 20px;
+    color: var(--ink-warm);
+    text-align: left;
+  }
+
+  /* —— Seal —— */
+  .seal {
+    background: var(--peach);
+    color: var(--paper);
+    border-radius: 50%;
+    width: 24px; height: 24px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'Noto Serif KR';
+    font-size: 13px;
+  }
+  .seal.large { width: 144px; height: 144px; font-size: 80px; }
+  .seal.med { width: 60px; height: 60px; font-size: 36px; }
+
+  /* —— Step indicator —— */
+  .stepbar { display: flex; gap: 4px; padding: 0 4px; }
+  .stepbar .col { flex: 1; }
+  .stepbar .bar { height: 2px; border-radius: 1px; background: rgba(92,79,69,0.2); }
+  .stepbar .bar.on { background: var(--peach); }
+  .stepbar .lbl { text-align: center; font-size: 11px; margin-top: 4px; color: var(--ink-soft); }
+  .stepbar .lbl.on { color: var(--peach); }
+
+  /* —— Milestone row —— */
+  .ms-card {
+    background: var(--paper);
+    border: 0.5px solid var(--ink-soft);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .ms-card.on { background: var(--peach-soft); border-color: var(--peach); }
+  .ms-card.dim { opacity: 0.45; }
+
+  /* —— Brand dot row (promises) —— */
+  .promise-row { display: flex; gap: 12px; margin-bottom: 24px; }
+  .promise-row .pdot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--peach);
+    margin-top: 11px;
+    flex: none;
+  }
+
+  /* —— Section header —— */
+  .sec-h {
+    font-size: 11px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding-left: 4px;
+    margin-bottom: 8px;
+  }
+
+  /* —— Photo thumbs —— */
+  .thumbs { display: flex; gap: 8px; flex-wrap: wrap; }
+  .thumb {
+    width: 72px; height: 72px;
+    border-radius: 8px;
+    border: 0.5px solid var(--ink-soft);
+    background: linear-gradient(135deg, #d8d2c3 0%, #b8ada0 100%);
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-family: 'Cormorant Garamond';
+    font-style: italic;
+    font-size: 14px;
+  }
+  .thumb.add {
+    background: transparent;
+    border: 1px dashed var(--ink-soft);
+    color: var(--ink-soft);
+    font-size: 24px;
+  }
+
+  /* —— Splash —— */
+  .splash {
+    background: var(--paper);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    flex: 1;
+    gap: 24px;
+  }
+</style>
+</head>
+<body>
+
+<h1 class="page">닿다 — 화면 목업</h1>
+<p class="page-sub">CLAUDE.md §6 디자인 시스템 그대로. 토큰·폰트·간격 모두 코드 일치.</p>
+
+<div class="grid">
+
+<!-- ============== 1. SPLASH ============== -->
+<div style="position:relative;">
+  <div class="label"><span class="num">01</span> Splash · 워드마크 페이드인 + 랜덤 메시지</div>
+  <div class="screen">
+    <div class="splash">
+      <div class="wordmark" style="font-size:56px;">
+        닿다<span class="dot"></span>
+      </div>
+      <div class="body s ink-soft" style="margin-top:8px;">당신의 마음이 자녀에게 닿습니다</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== 2. WELCOME ============== -->
+<div style="position:relative;">
+  <div class="label"><span class="num">02</span> Onboarding · 환영</div>
+  <div class="screen">
+    <div class="statusbar"><span>9:41</span><span style="font-style:normal;font-family:sans-serif;font-size:13px;">●●●●</span></div>
+    <div class="pad" style="justify-content:space-between;">
+      <div></div>
+      <div style="text-align:center;">
+        <div class="wordmark" style="font-size:56px; justify-content:center;">
+          닿다<span class="dot"></span>
+        </div>
+        <div class="serif h2" style="margin-top:32px;">
+          닿다는<br>당신과 자녀의 약속입니다
+        </div>
+        <div class="body t ink-soft center" style="margin-top:16px;">
+          오늘의 한 줄이, 자녀가 자라난<br>그날의 평생이 됩니다.
+        </div>
+      </div>
+      <button class="btn primary full">시작하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== 3. PROMISES ============== -->
+<div style="position:relative;">
+  <div class="label"><span class="num">03</span> Onboarding · 네 가지 약속 (§10.2)</div>
+  <div class="screen">
+    <div class="statusbar"><span>9:41</span><span style="font-style:normal;font-family:sans-serif;font-size:13px;">●●●●</span></div>
+    <div class="pad" style="justify-content:space-between;">
+      <div>
+        <div class="english s gold">네 가지 약속</div>
+        <div class="serif h2" style="margin-top:4px;">당신의 캡슐은</div>
+        <div style="margin-top:32px;">
+          <div class="promise-row">
+            <div class="pdot"></div>
+            <div>
+              <div class="serif h4">영원합니다</div>
+              <div class="body s ink-soft" style="margin-top:4px;">회사가 사라져도 캡슐은 사라지지 않습니다.</div>
+            </div>
+          </div>
+          <div class="promise-row">
+            <div class="pdot"></div>
+            <div>
+              <div class="serif h4">비공개입니다</div>
+              <div class="body s ink-soft" style="margin-top:4px;">가족 외 누구도 보지 못합니다. 광고는 영원히 없습니다.</div>
+            </div>
+          </div>
+          <div class="promise-row">
+            <div class="pdot"></div>
+            <div>
+              <div class="serif h4">언제든 가져갈 수 있습니다</div>
+              <div class="body s ink-soft" style="margin-top:4px;">모든 캡슐을 즉시 PDF·ZIP으로 내보낼 수 있습니다.</div>
+            </div>
+          </div>
+          <div class="promise-row">
+            <div class="pdot"></div>
+            <div>
+              <div class="serif h4">자녀에게 닿습니다</div>
+              <div class="body s ink-soft" style="margin-top:4px;">부모님이 사망하셔도 미리 지정한 가족이 인계받습니다.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn primary full">다음</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== 4. LOGIN ============== -->
+<div style="position:relative;">
+  <div class="label"><span class="num">04</span> Onboarding · 로그인 (이메일)</div>
+  <div class="screen">
+    <div class="statusbar"><span>9:41</span><span style="font-style:normal;font-family:sans-serif;font-size:13px;">●●●●</span></div>
+    <div class="pad gap-lg">
+      <div>
+        <div class="serif h2">다시 들어오시겠어요</div>
+        <div class="body s ink-soft" style="margin-top:8px;">봉인된 캡슐은 그대로 기다리고 있어요.</div>
+      </div>
+      <div>
+        <div class="input-label">이메일</div>
+        <div class="input focus">you@example.com</div>
+      </div>
+      <div>
+        <div class="input-label">비밀번호</div>
+        <div class="input">••••••••</div>
+      </div>
+      <div></div>
+      <button class="btn primary full">로그인</button>
+      <button class="btn tertiary full">처음이신가요? 가입하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== 5. CAPSULES TAB (data) ============== -->
+<div style="position:relative;">
+  <div class="label"><span class="num">05</span> 캡슐 탭 · 봉인된 채 다가오는 중</div>
+  <div class="screen">
+    <div class="statusbar"><span>9:41</span><span style="font-style:normal;font-family:sans-serif;font-size:13px;">●●●●</span></div>
+    <div class="pad gap-lg" style="overflow:auto;">
+      <div>
+        <div class="serif h1">캡슐</div>
+        <div class="body s ink-soft" style="margin-top:4px;">오늘의 한 줄이, 그날의 평생이 됩니다.</div>
+      </div>
+
+      <div>
+        <div class="sec-h">가장 먼저 닿는 캡슐</div>
+        <div class="card">
+          <div style="display:flex; justify-content:space-between;">
+            <div style="flex:1;">
+              <div class="body xs ink-soft">도윤에게</div>
+              <div class="serif h4" style="margin-top:4px;">초등학교 입학 전 밤에</div>
+              <div style="margin-top:8px; display:flex; gap:8px; align-items:baseline;">
+                <span class="english s ink-soft">2031.03.04</span>
+                <span class="english s gold">D-1,750</span>
+              </div>
+            </div>
+            <div class="seal">닿</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:baseline; padding:0 4px;">
+          <div class="serif h3">진행 중</div>
+          <div class="body xs ink-soft">봉인하기 전엔 언제든 수정할 수 있어요</div>
+        </div>
+        <div class="card" style="margin-top:8px;">
+          <div class="body xs ink-soft">서연에게</div>
+          <div class="serif h4" style="margin-top:4px;">작성 중인 캡슐</div>
+          <div style="margin-top:8px; display:flex; gap:8px; align-items:baseline;">
+            <span class="english s ink-soft">2042.05.20</span>
+            <span class="english s gold">D-5,853</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="serif h3" style="padding:0 4px;">봉인됨</div>
+        <div class="card" style="margin-top:8px;">
+          <div style="display:flex; justify-content:space-between;">
+            <div style="flex:1;">
+              <div class="body xs ink-soft">도윤에게</div>
+              <div class="serif h4" style="margin-top:4px;">백일에 보내는 첫 편지</div>
+              <div style="margin-top:8px; display:flex; gap:8px; align-items:baseline;">
+                <span class="english s ink-soft">2024.06.23</span>
+                <span class="english s gold">D-day</span>
+              </div>
+            </div>
+            <div class="seal">닿</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn secondary full">새 캡슐</button>
+    </div>
+    <div class="tabbar">
+      <div class="tab active"><span class="icon">✉</span>캡슐</div>
+      <div class="tab"><span class="icon">♡</span>자녀</div>
+      <div class="tab"><span class="icon">○</span>나</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== 6. CHILDREN TAB ============== -->
+<div style="position:relative;">
+  <div class="label"><span class="num">06</span> 자녀 탭 · 카드 + 다가오는 마일스톤</div>
+  <div class="screen">
+    <div class="statusbar"><span>9:41</span><span style="font-style:normal;font-family:sans-serif;font-size:13px;">●●●●</span></div>
+    <div class="pad gap-lg">
+      <div>
+        <div class="serif h1">자녀</div>
+        <div class="body s ink-soft" style="margin-top:4px;">닿게 할 마음의 받는 사람.</div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+          <div class="hand h3">김도윤</div>
+          <div class="body s ink-soft">만 2세</div>
+        </div>
+        <div class="english s ink-soft" style="margin-top:4px;">2024.03.15</div>
+        <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+          <div style="width:4px; height:4px; border-radius:50%; background:var(--peach);"></div>
+          <div class="body s">다가오는 초등학교 입학</div>
+          <div class="english s gold">D-1,750</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+          <div class="hand h3">김서연</div>
+          <div class="body s ink-soft">생후 105일</div>
+        </div>
+        <div class="english s ink-soft" style="margin-top:4px;">2026.02.04</div>
+        <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+          <div style="width:4px; height:4px; border-radius:50%; background:var(--peach);"></div>
+          <div class="body s">다가오는 돌</div>
+          <div class="english s gold">D-260</div>
+        </div>
+      </div>
+
+      <button class="btn secondary full">자녀 추가하기</button>
+    </div>
+    <div class="tabbar">
+      <div class="tab"><span class="icon">✉</span>캡슐</div>
+      <div class="tab active"><span class="icon">♡</span>자녀</div>
+      <div class="tab"><span class="icon">○</span>나</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== 7. CAPSULE WIZARD STEP 2 ============== -->
+<div style="position:relative;">
+  <div class="label"><span class="num">07</span> 새 캡슐 · Step 2 시점 선택</div>
+  <div class="screen">
+    <div class="statusbar"><span>9:41</span><span style="font-style:normal;font-family:sans-serif;font-size:13px;">●●●●</span></div>
+    <div class="header">새 캡슐</div>
+    <div class="pad gap-lg">
+      <div class="stepbar">
+        <div class="col"><div class="bar on"></div><div class="lbl">자녀</div></div>
+        <div class="col"><div class="bar on"></div><div class="lbl on">시점</div></div>
+        <div class="col"><div class="bar"></div><div class="lbl">본문</div></div>
+        <div class="col"><div class="bar"></div><div class="lbl">봉인</div></div>
+      </div>
+
+      <div class="serif h3">언제 닿게 할까요?</div>
+
+      <div class="ms-card">
+        <div style="display:flex; justify-content:space-between;">
+          <div class="serif h4">초등학교 입학</div>
+        </div>
+        <div style="margin-top:4px; display:flex; gap:8px;">
+          <span class="english s ink-soft">2031.03.04</span>
+          <span class="english s gold">D-1,750</span>
+        </div>
+        <div class="body xs ink-soft" style="margin-top:4px;">그때 만 7세</div>
+      </div>
+
+      <div class="ms-card on">
+        <div style="display:flex; justify-content:space-between;">
+          <div class="serif h4">수능 D-100</div>
+        </div>
+        <div style="margin-top:4px; display:flex; gap:8px;">
+          <span class="english s ink-soft">2041.07.31</span>
+          <span class="english s gold">D-5,553</span>
+        </div>
+        <div class="body xs ink-soft" style="margin-top:4px;">그때 만 17세</div>
+      </div>
+
+      <div class="ms-card">
+        <div style="display:flex; justify-content:space-between;">
+          <div class="serif h4">성년식</div>
+        </div>
+        <div style="margin-top:4px; display:flex; gap:8px;">
+          <span class="english s ink-soft">2042.03.15</span>
+          <span class="english s gold">D-5,815</span>
+        </div>
+        <div class="body xs ink-soft" style="margin-top:4px;">그때 만 18세</div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:16px;">
+        <button class="btn secondary">이전</button>
+        <button class="btn primary" style="flex:1;">다음</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== 8. CAPSULE WIZARD STEP 3 — body + photos ============== -->
+<div style="position:relative;">
+  <div class="label"><span class="num">08</span> 새 캡슐 · Step 3 본문 + 사진</div>
+  <div class="screen">
+    <div class="statusbar"><span>9:41</span><span style="font-style:normal;font-family:sans-serif;font-size:13px;">●●●●</span></div>
+    <div class="header">새 캡슐</div>
+    <div class="pad gap-md">
+      <div class="stepbar">
+        <div class="col"><div class="bar on"></div><div class="lbl">자녀</div></div>
+        <div class="col"><div class="bar on"></div><div class="lbl">시점</div></div>
+        <div class="col"><div class="bar on"></div><div class="lbl on">본문</div></div>
+        <div class="col"><div class="bar"></div><div class="lbl">봉인</div></div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:baseline;">
+        <div class="serif h3">마음을 적어주세요</div>
+        <div class="body xs ink-soft">저장 중…</div>
+      </div>
+
+      <div>
+        <div class="input-label">제목 (선택)</div>
+        <div class="input">수능 100일 전 너에게</div>
+      </div>
+
+      <div>
+        <div class="input-label">본문</div>
+        <div class="input focus" style="min-height:120px; padding-top:8px;">
+          도윤아, 이 글을 받는 너는<br>이미 열일곱 살이겠지.<br>지금 너는 두 살, 거실에서 곰돌이를 끌고 다녀.…
+        </div>
+      </div>
+      <div class="body xs ink-soft">312 / 5,000자</div>
+
+      <div>
+        <div class="input-label">사진 (선택, 최대 5장)</div>
+        <div class="thumbs" style="margin-top:8px;">
+          <div class="thumb">img 1</div>
+          <div class="thumb">img 2</div>
+          <div class="thumb">img 3</div>
+          <div class="thumb add">+</div>
+        </div>
+        <div class="body xs ink-soft" style="margin-top:8px;">길게 눌러 빼기. 다음 단계로 갈 때 함께 봉인됩니다.</div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button class="btn secondary">이전</button>
+        <button class="btn primary" style="flex:1;">다음 — 봉인 확인</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== 9. CAPSULE WIZARD STEP 4 — seal confirm ============== -->
+<div style="position:relative;">
+  <div class="label"><span class="num">09</span> 새 캡슐 · Step 4 봉인 확인 (의도적 마찰)</div>
+  <div class="screen">
+    <div class="statusbar"><span>9:41</span><span style="font-style:normal;font-family:sans-serif;font-size:13px;">●●●●</span></div>
+    <div class="header">새 캡슐</div>
+    <div class="pad gap-lg">
+      <div class="stepbar">
+        <div class="col"><div class="bar on"></div><div class="lbl">자녀</div></div>
+        <div class="col"><div class="bar on"></div><div class="lbl">시점</div></div>
+        <div class="col"><div class="bar on"></div><div class="lbl">본문</div></div>
+        <div class="col"><div class="bar on"></div><div class="lbl on">봉인</div></div>
+      </div>
+
+      <div class="serif h3">잠깐, 신중히 생각해보세요</div>
+
+      <div class="card">
+        <div style="display:flex; gap:16px;">
+          <div class="body s ink-soft" style="width:64px;">받을 사람</div>
+          <div class="body t" style="flex:1;">김도윤 (만 17세)</div>
+        </div>
+        <div style="display:flex; gap:16px; margin-top:8px;">
+          <div class="body s ink-soft" style="width:64px;">닿을 시점</div>
+          <div class="body t" style="flex:1;">2041년 7월 31일</div>
+        </div>
+        <div style="display:flex; gap:16px; margin-top:8px;">
+          <div class="body s ink-soft" style="width:64px;">제목</div>
+          <div class="body t" style="flex:1;">수능 100일 전 너에게</div>
+        </div>
+        <div style="display:flex; gap:16px; margin-top:8px;">
+          <div class="body s ink-soft" style="width:64px;">본문</div>
+          <div class="body t" style="flex:1;">도윤아, 이 글을 받는 너는 이미 열일곱 살이겠지…</div>
+        </div>
+      </div>
+
+      <div class="card peach-soft">
+        <div class="serif h4">봉인 후에는 수정·삭제할 수 없습니다</div>
+        <div class="body s" style="margin-top:8px;">한 번 보낸 편지는 회수할 수 없는 것과 같습니다. 그게 약속의 무게입니다.</div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button class="btn secondary">이전</button>
+        <button class="btn primary" style="flex:1;">길게 눌러 봉인</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== 10. SEAL ANIMATION ============== -->
+<div style="position:relative;">
+  <div class="label"><span class="num">10</span> 봉인 시그니처 (§6.5)</div>
+  <div class="screen">
+    <div class="splash">
+      <div class="seal large">닿</div>
+      <div class="serif h3" style="font-size:20px; margin-top:32px;">봉인되었습니다</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== 11. CHILD DETAIL ============== -->
+<div style="position:relative;">
+  <div class="label"><span class="num">11</span> 자녀 상세 · 마일스톤 캘린더</div>
+  <div class="screen">
+    <div class="statusbar"><span>9:41</span><span style="font-style:normal;font-family:sans-serif;font-size:13px;">●●●●</span></div>
+    <div class="header">김도윤</div>
+    <div class="pad gap-lg">
+      <div>
+        <div class="hand h1">김도윤</div>
+        <div class="english s ink-soft" style="margin-top:4px;">2024.03.15 · 만 2세</div>
+      </div>
+
+      <div>
+        <div class="serif h3">마일스톤</div>
+        <div style="margin-top:12px;">
+          <div class="ms-card dim" style="margin-bottom:8px;">
+            <div class="serif h4">백일</div>
+            <div style="margin-top:4px; display:flex; gap:8px;">
+              <span class="english s ink-soft">2024.06.23</span>
+              <span class="english s ink-soft">지남</span>
+            </div>
+            <div class="body xs ink-soft" style="margin-top:4px;">생후 100일</div>
+          </div>
+          <div class="ms-card dim" style="margin-bottom:8px;">
+            <div class="serif h4">돌</div>
+            <div style="margin-top:4px; display:flex; gap:8px;">
+              <span class="english s ink-soft">2025.03.15</span>
+              <span class="english s ink-soft">지남</span>
+            </div>
+            <div class="body xs ink-soft" style="margin-top:4px;">만 1세</div>
+          </div>
+          <div class="ms-card" style="margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between;">
+              <div class="serif h4">초등학교 입학</div>
+            </div>
+            <div style="margin-top:4px; display:flex; gap:8px;">
+              <span class="english s ink-soft">2031.03.04</span>
+              <span class="english s gold">D-1,750</span>
+            </div>
+            <div class="body xs ink-soft" style="margin-top:4px;">그때 만 7세</div>
+          </div>
+          <div class="ms-card" style="margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between;">
+              <div class="serif h4">수능 D-100</div>
+            </div>
+            <div style="margin-top:4px; display:flex; gap:8px;">
+              <span class="english s ink-soft">2041.07.31</span>
+              <span class="english s gold">D-5,553</span>
+            </div>
+            <div class="body xs ink-soft" style="margin-top:4px;">그때 만 17세</div>
+          </div>
+          <div class="ms-card">
+            <div style="display:flex; justify-content:space-between;">
+              <div class="serif h4">성년식</div>
+            </div>
+            <div style="margin-top:4px; display:flex; gap:8px;">
+              <span class="english s ink-soft">2042.03.15</span>
+              <span class="english s gold">D-5,815</span>
+            </div>
+            <div class="body xs ink-soft" style="margin-top:4px;">그때 만 18세</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== 12. ME TAB ============== -->
+<div style="position:relative;">
+  <div class="label"><span class="num">12</span> 나 탭 · 신뢰 시스템 메뉴 (§10)</div>
+  <div class="screen">
+    <div class="statusbar"><span>9:41</span><span style="font-style:normal;font-family:sans-serif;font-size:13px;">●●●●</span></div>
+    <div class="pad gap-lg" style="overflow:auto;">
+      <div>
+        <div class="serif h1">나</div>
+        <div class="english s ink-soft" style="margin-top:4px;">you@example.com</div>
+      </div>
+
+      <div>
+        <div class="sec-h">신뢰</div>
+        <div class="card tight">
+          <div class="card-row">
+            <div class="body t">영구 백업 — PDF·ZIP 내보내기</div>
+            <div class="body xs ink-soft" style="margin-top:4px;">언제든, 영원히 무료</div>
+          </div>
+          <div class="card-row">
+            <div class="body t">상속 관리자 지정</div>
+            <div class="body xs ink-soft" style="margin-top:4px;">배우자 또는 지인 1명</div>
+          </div>
+          <div class="card-row">
+            <div class="body t">회사 신뢰 페이지</div>
+            <div class="body xs ink-soft" style="margin-top:4px;">분기별 transparency report</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-h">구독</div>
+        <div class="card tight">
+          <div class="card-row">
+            <div class="body t">플랜</div>
+            <div class="body xs ink-soft" style="margin-top:4px;">무료 — 자녀 1명, 캡슐 1개</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-h">설정</div>
+        <div class="card tight">
+          <div class="card-row">
+            <div class="body t">알림</div>
+            <div class="body xs ink-soft" style="margin-top:4px;">모두 끄셔도 괜찮습니다</div>
+          </div>
+          <div class="card-row">
+            <div class="body t">도움말 / 문의</div>
+          </div>
+          <div class="card-row">
+            <div class="body t">약관 / 개인정보처리방침</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-h">계정</div>
+        <div class="card tight">
+          <div class="card-row"><div class="body t">로그아웃</div></div>
+          <div class="card-row"><div class="body t" style="color:var(--error);">계정 삭제</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="tabbar">
+      <div class="tab"><span class="icon">✉</span>캡슐</div>
+      <div class="tab"><span class="icon">♡</span>자녀</div>
+      <div class="tab active"><span class="icon">○</span>나</div>
+    </div>
+  </div>
+</div>
+
+</div> <!-- /.grid -->
+
+<p class="page-sub" style="margin-top:64px;">
+  글자가 깨져 보이면 인터넷 연결을 확인해주세요. Google Fonts에서 Noto Serif KR, Gowun Dodum, Cormorant Garamond를 가져옵니다.
+</p>
+
+</body>
+</html>
